@@ -1,0 +1,32 @@
+apiVersion: skaffold/v2beta7
+kind: Config
+build:
+  artifacts:
+  - image: app
+portForward:
+  - resourceType: service
+    resourceName: kubernetes-dashboard
+    port: 443
+    localPort: 8000
+  - resourceType: service
+    resourceName: prometheus-server
+    port: 80
+    localPort: 9090
+deploy:
+  helm:
+    releases:
+      - name: app
+        chartPath: charts
+        artifactOverrides:
+          image: app
+      - name: dashboard
+        chartPath: kubernetes-dashboard/kubernetes-dashboard
+        skipBuildDependencies: true
+        remote: true
+        setValueTemplates:
+          fullnameOverride: 'kubernetes-dashboard'
+      - name: prometheus
+        chartPath: stable/prometheus
+        skipBuildDependencies: true
+        remote: true
+     
